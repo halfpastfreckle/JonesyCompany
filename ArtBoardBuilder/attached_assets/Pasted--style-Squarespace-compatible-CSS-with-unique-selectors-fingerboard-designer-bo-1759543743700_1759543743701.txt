@@ -1,0 +1,785 @@
+<style>
+  /* Squarespace-compatible CSS with unique selectors */
+  .fingerboard-designer {
+    box-sizing: border-box;
+    background: #f8fafc;
+    color: #0f172a;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+    width: 100%;
+    margin: 20px auto;
+    padding: 0;
+    max-width: 1400px;
+  }
+
+  .fingerboard-designer * { box-sizing: border-box; }
+
+  .fb-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    padding: 20px;
+    min-height: 600px;
+  }
+  @media (max-width: 768px) {
+    .fb-wrap { grid-template-columns: 1fr; gap: 16px; padding: 16px; }
+  }
+
+  .fb-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 10px 24px rgba(2,6,23,.06), 0 2px 6px rgba(2,6,23,.04);
+    overflow: hidden;
+  }
+  .fb-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin: 0 0 12px 0; padding: 20px 20px 0;
+  }
+  .fb-brand { display: flex; align-items: center; gap: 12px; }
+  .fb-dot { width: 14px; height: 14px; border-radius: 50%; background: linear-gradient(135deg, #06b6d4, #0ea5e9); flex-shrink: 0; }
+  .fb-title { font-size: 20px; font-weight: 700; margin: 0; }
+  .fb-badge { font-size: 11px; color: #64748b; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; }
+
+  .fb-preview {
+    position: relative; min-height: 600px; padding: 20px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  }
+
+  .fb-toolbar { margin-bottom: 16px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .fb-chip {
+    background: rgba(15,23,42,0.85); color: #e5f4ff;
+    padding: 8px 12px; border-radius: 20px; font-size: 11px; border: 1px solid rgba(255,255,255,.2); white-space: nowrap;
+  }
+
+  .fb-canvas {
+    width: 100%; max-width: 200px; aspect-ratio: 32/105; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15); user-select: none; touch-action: none;
+  }
+  @media (max-width: 768px) { .fb-canvas { max-width: 300px; } }
+
+  .fb-controls { padding: 20px; overflow-y: auto; max-height: calc(100vh - 40px); }
+  .fb-controls h2 { font-size: 18px; font-weight: 700; margin: 0 0 16px; color: #0f172a; }
+
+  .fb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  @media (max-width: 768px) { .fb-grid { grid-template-columns: 1fr; gap: 10px; } }
+
+  .fb-row { display: flex; flex-direction: column; gap: 6px; }
+  .fb-row label { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .fb-span-2 { grid-column: span 2; }
+  @media (max-width: 768px) { .fb-span-2 { grid-column: span 1; } }
+
+  .fb-input, .fb-select {
+    padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; background: white; outline: none; font-size: 14px; transition: all 0.2s ease; width: 100%;
+  }
+  .fb-input:focus, .fb-select:focus { border-color: #06b6d4; box-shadow: 0 0 0 3px rgba(6,182,212,.35); }
+
+  .fb-file { font-size: 12px; padding: 8px; border: 2px dashed #e2e8f0; border-radius: 10px; background: #f8fafc; cursor: pointer; transition: all 0.2s ease; }
+  .fb-file:hover { border-color: #06b6d4; background: #f1f5f9; }
+
+  .fb-color { height: 42px; padding: 4px; border-radius: 10px; border: 1px solid #e2e8f0; background: white; cursor: pointer; width: 100%; }
+  .fb-range { width: 100%; height: 6px; border-radius: 3px; background: #e2e8f0; outline: none; cursor: pointer; }
+  .fb-value { font-size: 12px; color: #64748b; font-weight: 600; text-align: center; margin-top: 4px; }
+
+  .fb-actions {
+    display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    margin-top: 16px; padding-top: 16px; border-top: 1px solid #e2e8f0;
+  }
+  .fb-pill { display: inline-flex; align-items: center; gap: 8px; border: 1px solid #e2e8f0; border-radius: 25px; padding: 12px 16px; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); font-size: 14px; }
+  .fb-price { font-weight: 700; color: #06b6d4; font-size: 18px; }
+  .fb-shipping { font-size: 11px; color: #64748b; margin-top: 4px; text-align: center; }
+
+  .fb-btn {
+    appearance: none; border: 0; border-radius: 10px; padding: 12px 18px; font-weight: 600; cursor: pointer; font-size: 14px;
+    transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none;
+  }
+  .fb-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .fb-btn-primary { background: linear-gradient(135deg, #06b6d4, #0ea5e9); color: white; box-shadow: 0 4px 12px rgba(6,182,212,0.3); }
+  .fb-btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(6,182,212,0.4); }
+  .fb-btn-ghost { background: white; border: 1px solid #e2e8f0; color: #0f172a; }
+  .fb-btn-ghost:hover { background: #f8fafc; border-color: #06b6d4; }
+
+  .fb-disclaimer {
+    font-size: 11px; color: #64748b; margin-top: 12px; padding: 12px; background: #f8fafc; border-radius: 8px; border-left: 3px solid #06b6d4;
+  }
+
+  .fb-draggable { cursor: grab; }
+  .fb-draggable.dragging { cursor: grabbing !important; }
+
+  .fb-message { padding: 12px; border-radius: 8px; margin-top: 12px; text-align: center; font-weight: 600; display: none; }
+  .fb-success { background: #10b981; color: white; }
+  .fb-error { background: #ef4444; color: white; }
+
+  @media (max-width: 768px) {
+    .fb-actions { flex-direction: column; align-items: stretch; gap: 8px; }
+    .fb-actions > * { width: 100%; }
+  }
+</style>
+
+<div class="fingerboard-designer">
+  <div class="fb-wrap" id="boardApp">
+    <!-- Preview Section -->
+    <section class="fb-card fb-preview">
+      <div class="fb-header">
+        <div class="fb-brand">
+          <div class="fb-dot"></div>
+          <h1 class="fb-title">Custom Fingerboard Designer</h1>
+        </div>
+        <div class="fb-badge">Live Preview</div>
+      </div>
+
+      <div class="fb-toolbar">
+        <div class="fb-chip">📱 Drag elements to move</div>
+        <div class="fb-chip">🔍 Scroll to zoom image</div>
+        <div class="fb-chip">🔄 Shift + Scroll to rotate</div>
+      </div>
+
+      <!-- SVG Canvas (template) -->
+      <svg class="fb-canvas" id="deckSvg" viewBox="0 0 32 105" role="img" aria-label="Custom fingerboard preview">
+        <defs>
+          <clipPath id="deckClip">
+            <rect x="0" y="0" width="32" height="105" rx="16" ry="16"></rect>
+          </clipPath>
+
+          <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000" flood-opacity="0.25"/>
+          </filter>
+          
+          <filter id="textShadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="0.5" stdDeviation="0.8" flood-color="#000" flood-opacity="0.4"/>
+          </filter>
+        </defs>
+
+        <!-- Board shadow and outline -->
+        <g filter="url(#softShadow)">
+          <rect x="0" y="0" width="32" height="105" rx="16" ry="16" fill="#f8fafc" stroke="#cbd5e1" stroke-width="0.5"></rect>
+        </g>
+
+        <!-- Background fill -->
+        <rect id="bgFill" x="0" y="0" width="32" height="105" rx="16" ry="16" fill="#ffffff" clip-path="url(#deckClip)"></rect>
+
+        <!-- Aging / grain lines (behind art & text) -->
+        <g id="ageLines" clip-path="url(#deckClip)" opacity="0"></g>
+
+        <!-- Uploaded image -->
+        <image id="artImg" 
+               href="" 
+               x="8" 
+               y="20" 
+               width="16" 
+               height="40" 
+               opacity="0" 
+               clip-path="url(#deckClip)" 
+               class="fb-draggable" 
+               tabindex="0"></image>
+
+        <!-- Text overlay (template helper; not required for final) -->
+        <text id="overlayText" 
+              x="16" 
+              y="52.5" 
+              text-anchor="middle" 
+              dominant-baseline="middle"
+              font-size="6" 
+              font-family="Impact, Arial Black, sans-serif" 
+              fill="#0f172a" 
+              class="fb-draggable" 
+              opacity="0.6" 
+              tabindex="0"
+              
+
+        <!-- Extra user text nodes will be appended here -->
+        <g id="textLayer"></g>
+
+        <!-- Guide lines -->
+        <g id="guides" pointer-events="none" opacity="0.2">
+          <rect x="0" y="1.5" width="32" height="102" rx="16" ry="16" fill="none" stroke="#ef4444" stroke-width="0.3" stroke-dasharray="1 1"/>
+          <rect x="0" y="24" width="32" height="8" fill="none" stroke="#ef4444" stroke-width="0.3"/>
+          <rect x="0" y="73" width="32" height="8" fill="none" stroke="#ef4444" stroke-width="0.3"/>
+          <text x="16" y="14" text-anchor="middle" font-size="2" fill="#ef4444" opacity="0.7">SAFE AREA</text>
+          <text x="16" y="28" text-anchor="middle" font-size="1.5" fill="#ef4444" opacity="0.7">TRUCK</text>
+          <text x="16" y="77" text-anchor="middle" font-size="1.5" fill="#ef4444" opacity="0.7">TRUCK</text>
+        </g>
+      </svg>
+    </section>
+
+    <!-- Controls Section -->
+    <section class="fb-card fb-controls">
+      <h2>🎨 Customize Your Board</h2>
+      
+      <div class="fb-grid">
+        <div class="fb-row">
+          <label for="veneer">Background Color</label>
+          <input type="color" id="veneer" value="#ffffff" class="fb-color" />
+        </div>
+
+        <div class="fb-row">
+          <label for="guideToggle">Design Guides</label>
+          <select id="guideToggle" class="fb-select">
+            <option value="on" selected>Show guides</option>
+            <option value="off">Hide guides</option>
+          </select>
+        </div>
+
+        <div class="fb-row fb-span-2">
+          <label for="text">Custom Text</label>
+          <input id="text" type="text" placeholder="Enter your text here" maxlength="30" class="fb-input" />
+        </div>
+
+        <div class="fb-row">
+          <label for="textSize">Text Size</label>
+          <input id="textSize" type="range" min="3" max="16" value="6" class="fb-range" />
+          <div class="fb-value" id="textSizeValue">6</div>
+        </div>
+
+        <div class="fb-row">
+          <label for="textColor">Text Color</label>
+          <input id="textColor" type="color" value="#0f172a" class="fb-color" />
+        </div>
+
+        <div class="fb-row">
+          <label for="font">Font Style</label>
+          <select id="font" class="fb-select">
+            <option value="Impact">Impact (Bold)</option>
+            <option value="Oswald">Oswald (Modern)</option>
+            <option value="Anton">Anton (Strong)</option>
+            <option value="Arial Black">Arial Black (Classic)</option>
+            <option value="Inter">Inter (Clean)</option>
+          </select>
+        </div>
+
+        <div class="fb-row">
+          <label for="textStroke">Text Outline</label>
+          <select id="textStroke" class="fb-select">
+            <option value="none">No outline</option>
+            <option value="thin">Thin outline</option>
+            <option value="thick">Thick outline</option>
+          </select>
+        </div>
+
+        <div class="fb-row fb-span-2">
+          <button id="addTextBtn" type="button" class="fb-btn fb-btn-primary">➕ Add Text to Board</button>
+        </div>
+
+        <div class="fb-row fb-span-2">
+          <label for="img">Upload Artwork (PNG/JPG, max 5MB)</label>
+          <input id="img" type="file" accept="image/png,image/jpeg,image/jpg" class="fb-file" />
+        </div>
+
+        <div class="fb-row">
+          <label for="imgScale">Image Size</label>
+          <input id="imgScale" type="range" min="10" max="300" value="100" class="fb-range" />
+          <div class="fb-value" id="imgScaleValue">100%</div>
+        </div>
+
+        <div class="fb-row">
+          <label for="imgRotate">Image Rotation</label>
+          <input id="imgRotate" type="range" min="-180" max="180" value="0" class="fb-range" />
+          <div class="fb-value" id="imgRotateValue">0°</div>
+        </div>
+
+        <div class="fb-row">
+          <label for="imgOpacity">Image Opacity</label>
+          <input id="imgOpacity" type="range" min="10" max="100" value="100" class="fb-range" />
+          <div class="fb-value" id="imgOpacityValue">100%</div>
+        </div>
+
+        <div class="fb-row">
+          <label>&nbsp;</label>
+          <button class="fb-btn fb-btn-ghost" id="flipBtn" type="button">🔄 Flip Image</button>
+        </div>
+
+        <div class="fb-row">
+          <label for="aging">Aging Lines</label>
+          <select id="aging" class="fb-select">
+            <option value="none" selected>None</option>
+            <option value="light">Light</option>
+            <option value="medium">Medium</option>
+            <option value="heavy">Heavy</option>
+          </select>
+        </div>
+
+        <div class="fb-row">
+          <label for="agingOpacity">Aging Intensity</label>
+          <input id="agingOpacity" type="range" min="0" max="100" value="30" class="fb-range" />
+          <div class="fb-value" id="agingOpacityValue">30%</div>
+        </div>
+      </div>
+
+      <div class="fb-actions">
+        <div style="text-align: center;">
+          <div class="fb-pill">
+            <span>Price:</span>
+            <span class="fb-price">$25</span>
+          </div>
+          <div class="fb-shipping">+ shipping</div>
+        </div>
+        
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="fb-btn fb-btn-ghost" type="button" id="reset">🔄 Reset Design</button>
+          <button class="fb-btn fb-btn-ghost" type="button" id="download">💾 Download SVG</button>
+          <button class="fb-btn fb-btn-primary" type="button" id="orderBtn">🛒 Order on Etsy</button>
+        </div>
+      </div>
+
+      <div class="fb-message fb-success" id="successMessage">
+        ✓ Opening Etsy to complete your order...
+      </div>
+      
+      <div class="fb-message fb-error" id="errorMessage">
+        ✗ Please add some custom text or artwork before ordering.
+      </div>
+
+      <div class="fb-disclaimer">
+        <strong>🏁 Fingerboard Specs:</strong> 32×105mm wooden deck with 16mm rounded corners. 
+        Design is automatically fitted to board shape. Red guides show safe printing areas and truck mounting zones.
+        <br><br>
+        <strong>📸 Best Results:</strong> Upload high-resolution images (300+ DPI) for crisp printing quality.
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  const $ = (s) => document.querySelector(s);
+
+  // Main SVG & layers
+  const deckSvg = $('#deckSvg');
+  const bgFill = $('#bgFill');
+  const artImg = $('#artImg');
+  const overlayText = $('#overlayText');
+  const textLayer = $('#textLayer');
+  const ageLines = $('#ageLines');
+  const guides = $('#guides');
+
+  // Controls
+  const veneer = $('#veneer');
+  const guideToggle = $('#guideToggle');
+  const textInput = $('#text');
+  const textSize = $('#textSize');
+  const textSizeValue = $('#textSizeValue');
+  const textColor = $('#textColor');
+  const textStroke = $('#textStroke');
+  const fontSel = $('#font');
+  const addTextBtn = $('#addTextBtn');
+
+  const imgInput = $('#img');
+  const imgScale = $('#imgScale');
+  const imgScaleValue = $('#imgScaleValue');
+  const imgRotate = $('#imgRotate');
+  const imgRotateValue = $('#imgRotateValue');
+  const imgOpacity = $('#imgOpacity');
+  const imgOpacityValue = $('#imgOpacityValue');
+  const flipBtn = $('#flipBtn');
+
+  const agingSel = $('#aging');
+  const agingOpacity = $('#agingOpacity');
+  const agingOpacityValue = $('#agingOpacityValue');
+
+  const resetBtn = $('#reset');
+  const orderBtn = $('#orderBtn');
+  const downloadBtn = $('#download');
+  const successMessage = $('#successMessage');
+  const errorMessage = $('#errorMessage');
+
+  // State
+  const state = {
+    board: { w: 32, h: 105, rx: 16, ry: 16 },
+    img: { x: 8, y: 20, w: 16, h: 40, scale: 1, rot: 0, opacity: 1, flipped: false, href: "" },
+    defaultText: { size: 6, color: '#0f172a', font: 'Impact', stroke: 'none' },
+    selectedTextEl: null, // currently selected text node in textLayer
+  };
+
+  // Utils
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+
+  function showMessage(element, duration = 2500) {
+    element.style.display = 'block';
+    setTimeout(() => { element.style.display = 'none'; }, duration);
+  }
+
+  // ---------- Background ----------
+  function updateBg() { bgFill.setAttribute('fill', veneer.value); }
+
+  // ---------- Guides ----------
+  guideToggle.addEventListener('change', () => {
+    guides.style.display = guideToggle.value === 'on' ? '' : 'none';
+  });
+
+  // ---------- Text Helpers ----------
+  function applyTextStyle(el) {
+    const size = parseFloat(textSize.value);
+    const color = textColor.value;
+    const font = fontSel.value;
+    const stroke = textStroke.value;
+
+    el.setAttribute('font-size', size);
+    el.setAttribute('fill', color);
+    el.setAttribute('font-family', `${font}, Arial Black, sans-serif`);
+    el.setAttribute('filter', 'url(#textShadow)');
+
+    let strokeWidth = 0;
+    let strokeColor = (color.toLowerCase() === '#ffffff' || color.toLowerCase() === '#fff') ? '#000000' : '#ffffff';
+    if (stroke === 'thin') strokeWidth = 0.3;
+    else if (stroke === 'thick') strokeWidth = 0.6;
+
+    if (stroke === 'none') {
+      el.removeAttribute('stroke');
+      el.removeAttribute('stroke-width');
+    } else {
+      el.setAttribute('stroke', strokeColor);
+      el.setAttribute('stroke-width', strokeWidth);
+    }
+    textSizeValue.textContent = Math.round(size);
+  }
+
+  function selectText(el) {
+    state.selectedTextEl = el;
+    // reflect selection in inputs
+    textInput.value = el.textContent || '';
+    const fs = parseFloat(el.getAttribute('font-size')) || state.defaultText.size;
+    textSize.value = fs; textSizeValue.textContent = Math.round(fs);
+    textColor.value = el.getAttribute('fill') || state.defaultText.color;
+    const ff = (el.getAttribute('font-family') || '').split(',')[0].trim().replace(/['"]/g,'') || state.defaultText.font;
+    fontSel.value = ff;
+    const sw = parseFloat(el.getAttribute('stroke-width') || 0);
+    textStroke.value = sw >= 0.6 ? 'thick' : (sw > 0 ? 'thin' : 'none');
+    // bring to front
+    textLayer.appendChild(el);
+  }
+
+  function createTextNode(value) {
+    const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    t.setAttribute('x', 16);
+    t.setAttribute('y', 52.5);
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('dominant-baseline', 'middle');
+    t.setAttribute('opacity', '1');
+    t.setAttribute('class', 'fb-draggable');
+    t.setAttribute('tabindex', '0');
+    t.textContent = value || 'Text';
+    applyTextStyle(t);
+    textLayer.appendChild(t);
+    makeDraggable(t, 'text');
+    t.addEventListener('mousedown', () => selectText(t));
+    t.addEventListener('touchstart', () => selectText(t), { passive: true });
+    selectText(t);
+    return t;
+  }
+
+  // Overlay helper text behavior
+  overlayText.addEventListener('mousedown', () => {
+    if (!overlayText.dataset.converted) {
+      // Convert helper text into a real text node
+      const val = textInput.value.trim() || 'Text';
+      const node = createTextNode(val);
+      overlayText.setAttribute('opacity', '0.15');
+      overlayText.dataset.converted = '1';
+      node.setAttribute('y', 52.5);
+    }
+  });
+
+  // Add Text button -> creates a new draggable text layer
+  addTextBtn.addEventListener('click', () => {
+    const val = textInput.value.trim();
+    if (!val) { textInput.focus(); return; }
+    createTextNode(val);
+    // optional: clear the input to encourage adding multiple labels
+    textInput.value = '';
+  });
+
+  // Typing updates the selected text (if any); otherwise updates helper label
+  textInput.addEventListener('input', () => {
+    const value = textInput.value;
+    if (state.selectedTextEl) {
+      state.selectedTextEl.textContent = value || 'Text';
+    } else {
+      overlayText.textContent = value || 'Click to add text';
+      overlayText.setAttribute('opacity', value ? '1' : '0.6');
+    }
+  });
+
+  // Text style inputs update selected text or the overlay helper
+  function updateTextStyle() {
+    if (state.selectedTextEl) {
+      applyTextStyle(state.selectedTextEl);
+    } else {
+      applyTextStyle(overlayText);
+    }
+  }
+  textSize.addEventListener('input', updateTextStyle);
+  textColor.addEventListener('input', updateTextStyle);
+  textStroke.addEventListener('change', updateTextStyle);
+  fontSel.addEventListener('change', updateTextStyle);
+
+  // ---------- Image ----------
+  function updateImageTransform() {
+    const s = state.img;
+    const flip = s.flipped ? -1 : 1;
+    const centerX = (s.w * s.scale) / 2;
+    const centerY = (s.h * s.scale) / 2;
+    const tx = s.x + (s.flipped ? s.w * s.scale : 0);
+    const transform = `translate(${tx} ${s.y}) rotate(${s.rot} ${centerX} ${centerY}) scale(${flip * s.scale} ${s.scale})`;
+    artImg.setAttribute('transform', transform);
+    artImg.setAttribute('width', s.w);
+    artImg.setAttribute('height', s.h);
+    artImg.setAttribute('opacity', s.opacity);
+    if (s.href) artImg.setAttribute('href', s.href);
+    imgScaleValue.textContent = Math.round(s.scale * 100) + '%';
+    imgRotateValue.textContent = Math.round(s.rot) + '°';
+    imgOpacityValue.textContent = Math.round(s.opacity * 100) + '%';
+  }
+
+  function loadImage(file) {
+    if (file.size > 5 * 1024 * 1024) {
+      errorMessage.textContent = '✗ Image too large. Please choose a file under 5MB.';
+      showMessage(errorMessage); return;
+    }
+    if (!file.type.match(/^image\/(png|jpeg|jpg)$/)) {
+      errorMessage.textContent = '✗ Please upload a PNG or JPG image file.';
+      showMessage(errorMessage); return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        state.img.href = e.target.result;
+        artImg.setAttribute('href', state.img.href);
+        artImg.setAttribute('opacity', '1');
+        updateImageTransform();
+      };
+      img.src = e.target.result;
+    };
+    reader.onerror = () => {
+      errorMessage.textContent = '✗ Error reading image file. Please try again.';
+      showMessage(errorMessage);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ---------- Dragging ----------
+  function makeDraggable(element, type) {
+    let isDragging = false;
+    let startPoint = { x: 0, y: 0 };
+    let basePoint = { x: 0, y: 0 };
+
+    function getSVGPoint(evt) {
+      const pt = deckSvg.createSVGPoint();
+      const sourceEvent = evt.touches?.[0] ?? evt;
+      pt.x = sourceEvent.clientX;
+      pt.y = sourceEvent.clientY;
+      return pt.matrixTransform(deckSvg.getScreenCTM().inverse());
+    }
+
+    function startDrag(evt) {
+      if (type === 'text') { selectText(element); }
+      isDragging = true;
+      element.classList.add('dragging');
+      const point = getSVGPoint(evt);
+      startPoint = { x: point.x, y: point.y };
+      if (type === 'img') {
+        basePoint = { x: state.img.x, y: state.img.y };
+      } else {
+        basePoint = { x: parseFloat(element.getAttribute('x')) || 16, y: parseFloat(element.getAttribute('y')) || 52.5 };
+      }
+      evt.preventDefault();
+    }
+
+    function drag(evt) {
+      if (!isDragging) return;
+      const point = getSVGPoint(evt);
+      const dx = point.x - startPoint.x;
+      const dy = point.y - startPoint.y;
+      if (type === 'img') {
+        state.img.x = clamp(basePoint.x + dx, -state.img.w, state.board.w);
+        state.img.y = clamp(basePoint.y + dy, -state.img.h, state.board.h);
+        updateImageTransform();
+      } else {
+        const nx = clamp(basePoint.x + dx, 2, state.board.w - 2);
+        const ny = clamp(basePoint.y + dy, 4, state.board.h - 4);
+        element.setAttribute('x', nx);
+        element.setAttribute('y', ny);
+      }
+    }
+
+    function endDrag() {
+      isDragging = false;
+      element.classList.remove('dragging');
+    }
+
+    // Mouse
+    element.addEventListener('mousedown', startDrag);
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', endDrag);
+    // Touch
+    element.addEventListener('touchstart', startDrag, { passive: false });
+    document.addEventListener('touchmove', drag, { passive: false });
+    document.addEventListener('touchend', endDrag);
+  }
+  makeDraggable(artImg, 'img');
+  makeDraggable(overlayText, 'text');
+
+  // ---------- Zoom/Rotate via wheel ----------
+  deckSvg.addEventListener('wheel', (e) => {
+    if (artImg.getAttribute('opacity') === '0') return;
+    e.preventDefault();
+    if (e.shiftKey) {
+      state.img.rot = clamp(state.img.rot + (e.deltaY < 0 ? -2 : 2), -180, 180);
+      imgRotate.value = state.img.rot;
+      updateImageTransform();
+    } else {
+      const delta = e.deltaY < 0 ? 1.06 : 0.94;
+      const newScale = clamp(state.img.scale * delta, 0.1, 3.0);
+      state.img.scale = newScale;
+      imgScale.value = Math.round(newScale * 100);
+      updateImageTransform();
+    }
+  }, { passive: false });
+
+  // ---------- Aging (age lines) ----------
+  function clearAgeLines() {
+    while (ageLines.firstChild) ageLines.removeChild(ageLines.firstChild);
+  }
+  function generateAgeLines(level) {
+    clearAgeLines();
+    if (level === 'none') { ageLines.setAttribute('opacity','0'); return; }
+    const countMap = { light: 20, medium: 40, heavy: 70 };
+    const count = countMap[level] || 0;
+    const strokeBase = '#334155'; // slate-700
+    for (let i = 0; i < count; i++) {
+      const y = 6 + Math.random() * (state.board.h - 12);
+      const amp = 0.2 + Math.random() * 0.6; // wobble
+      const wav = 0.15 + Math.random() * 0.35; // frequency-ish
+      let d = `M 1 ${y.toFixed(2)}`;
+      for (let x = 1; x <= 31; x++) {
+        const ny = y + Math.sin(x * wav + i) * amp;
+        d += ` L ${x.toFixed(2)} ${ny.toFixed(2)}`;
+      }
+      const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      p.setAttribute('d', d);
+      p.setAttribute('fill', 'none');
+      p.setAttribute('stroke', strokeBase);
+      p.setAttribute('stroke-opacity', 0.08 + Math.random() * 0.12);
+      p.setAttribute('stroke-width', 0.15 + Math.random() * 0.25);
+      p.setAttribute('shape-rendering', 'geometricPrecision');
+      ageLines.appendChild(p);
+    }
+    ageLines.setAttribute('opacity', clamp(parseInt(agingOpacity.value,10)/100, 0, 1));
+  }
+  agingSel.addEventListener('change', () => generateAgeLines(agingSel.value));
+  agingOpacity.addEventListener('input', () => {
+    agingOpacityValue.textContent = `${agingOpacity.value}%`;
+    ageLines.setAttribute('opacity', clamp(parseInt(agingOpacity.value,10)/100, 0, 1));
+  });
+
+  // ---------- Inputs wiring ----------
+  veneer.addEventListener('input', updateBg);
+
+  imgInput.addEventListener('change', (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) loadImage(file);
+  });
+
+  imgScale.addEventListener('input', () => {
+    state.img.scale = clamp(parseInt(imgScale.value,10)/100, 0.1, 3.0);
+    updateImageTransform();
+  });
+  imgRotate.addEventListener('input', () => {
+    state.img.rot = clamp(parseInt(imgRotate.value,10), -180, 180);
+    updateImageTransform();
+  });
+  imgOpacity.addEventListener('input', () => {
+    state.img.opacity = clamp(parseInt(imgOpacity.value,10)/100, 0.1, 1);
+    updateImageTransform();
+  });
+  flipBtn.addEventListener('click', () => {
+    state.img.flipped = !state.img.flipped;
+    updateImageTransform();
+  });
+
+  // ---------- Download SVG ----------
+  function downloadSVG() {
+    // Hide guides for export? Keep as is; you can toggle in UI.
+    const clone = deckSvg.cloneNode(true);
+    // Ensure xmlns on root for standalone SVG
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    const serializer = new XMLSerializer();
+    const svgStr = serializer.serializeToString(clone);
+    const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'fingerboard-design.svg';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }
+  downloadBtn.addEventListener('click', downloadSVG);
+
+  // ---------- Order ----------
+  orderBtn.addEventListener('click', () => {
+    const hasArt = artImg.getAttribute('opacity') !== '0';
+    const hasText = textLayer.children.length > 0 || (overlayText.textContent && overlayText.textContent !== 'Click to add text' && overlayText.getAttribute('opacity') !== '0.6');
+    if (!hasArt && !hasText) {
+      errorMessage.textContent = '✗ Please add some custom text or artwork before ordering.';
+      showMessage(errorMessage);
+      return;
+    }
+    showMessage(successMessage);
+    // Replace with your real Etsy URL
+    window.open('https://www.etsy.com/listing/1854254519/custom-handmade-wooden-fingerboard-built?ref=shop_home_feat_1&bes=1&sts=1&logging_key=6688a8daf971ee216605e029f66f51ae79c9c50f%3A1854254519');
+  });
+
+  // ---------- Reset ----------
+  function resetDesign() {
+    // background
+    veneer.value = '#ffffff'; updateBg();
+    // guides
+    guideToggle.value = 'on'; guides.style.display = '';
+    // text defaults
+    textInput.value = '';
+    textSize.value = 6; textSizeValue.textContent = '6';
+    textColor.value = '#0f172a';
+    fontSel.value = 'Impact';
+    textStroke.value = 'none';
+    state.selectedTextEl = null;
+
+    // overlay helper
+    overlayText.textContent = 'Click to add text';
+    overlayText.setAttribute('opacity', '0.6');
+    overlayText.removeAttribute('data-converted');
+    overlayText.removeAttribute('stroke');
+    overlayText.removeAttribute('stroke-width');
+    applyTextStyle(overlayText);
+    overlayText.setAttribute('x', 16);
+    overlayText.setAttribute('y', 52.5);
+
+    // remove user text nodes
+    while (textLayer.firstChild) textLayer.removeChild(textLayer.firstChild);
+
+    // image
+    state.img = { x: 8, y: 20, w: 16, h: 40, scale: 1, rot: 0, opacity: 1, flipped: false, href: "" };
+    artImg.setAttribute('href', '');
+    artImg.setAttribute('opacity', '0');
+    imgScale.value = 100; imgRotate.value = 0; imgOpacity.value = 100;
+    imgScaleValue.textContent = '100%'; imgRotateValue.textContent = '0°'; imgOpacityValue.textContent = '100%';
+    updateImageTransform();
+
+    // aging
+    agingSel.value = 'none';
+    agingOpacity.value = 30; agingOpacityValue.textContent = '30%';
+    clearAgeLines(); ageLines.setAttribute('opacity','0');
+  }
+  resetBtn.addEventListener('click', resetDesign);
+
+  // ---------- Init ----------
+  updateBg();
+  applyTextStyle(overlayText);
+  updateImageTransform();
+  agingOpacityValue.textContent = agingOpacity.value + '%';
+})();
+</script>
+
+
+
